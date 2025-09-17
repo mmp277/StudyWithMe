@@ -1,9 +1,9 @@
 
 
 
-# Name : Mithil Modi
-# Institute : Indian Institute of Technology, Guwahati
-# Department : Mechanical Engineering
+### Name : Mithil Modi
+### Institute : Indian Institute of Technology, Guwahati
+### Department : Mechanical Engineering
 
 
 
