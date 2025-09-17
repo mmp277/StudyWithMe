@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Register - AI Lecture Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .auth-card { max-width: 520px; margin: 60px auto; }
+      .auth-title { text-align:center; color: var(--accent-2); margin-bottom: 16px; font-weight: 800; }
+      .auth-desc { text-align:center; color: var(--muted); margin-bottom: 22px; }
+      .field { display:grid; gap:8px; margin-bottom:14px; }
+      .field label { font-weight:700; color:#dfe7ff; }
+      .input { padding: 12px 14px; border-radius: 12px; border:1.5px solid #273461; background:#121a3acc; color:#fff; }
+      .link { color: var(--accent-2); text-decoration:none; font-weight:700; }
+      .note { color: var(--muted); font-size:13px; text-align:center; margin-top:10px; }
+      .otp-box { display:none; margin-top:14px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="brand">
+          <a href="/" class="nav-btn">Home</a>
+        </div>
+        <div class="glow-bar" aria-hidden="true"></div>
+      </header>
+      <div class="panel auth-card">
+        <h2 class="auth-title">Create your account</h2>
+        <p class="auth-desc">Create an account to access your dashboard</p>
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" class="input" type="text" placeholder="Your name" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" class="input" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" class="input" type="password" placeholder="••••••••" />
+        </div>
+        <div class="actions" style="justify-content:space-between;">
+          <button id="btnRegister" class="btn">Register</button>
+          <a class="link" href="/login.html">I already have an account</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      const $ = (s) => document.querySelector(s);
+      async function register(){
+        const name = $('#name').value.trim();
+        const email = $('#email').value.trim();
+        const password = $('#password').value;
+        if(!email || !password){ alert('Enter email and password'); return; }
+        const r = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, email, password }) });
+        const j = await r.json().catch(()=>({}));
+        if(!r.ok || !j.ok){ alert(j.error || 'Register failed'); return; }
+        window.location.replace('/');
+      }
+      document.getElementById('btnRegister').addEventListener('click', register);
+    </script>
+  </body>
+  </html>
+
+

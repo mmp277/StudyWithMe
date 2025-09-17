@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flashcards - AI Lecture Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .cards { display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+      .card { background:#0b122bcc; border:1.5px solid #22305c; border-radius:16px; padding:14px; box-shadow:0 6px 22px rgba(124,92,255,0.2); }
+      .q { font-weight:800; color: var(--accent-2); margin-bottom:8px; }
+      .a { color:#e6ecff; }
+      .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+      .input { padding: 10px 12px; border-radius: 12px; border:1.5px solid #273461; background:#121a3acc; color:#fff; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="brand">
+          <a href="/" class="nav-btn">Back</a>
+        </div>
+        <div class="glow-bar" aria-hidden="true"></div>
+      </header>
+
+      <div class="result">
+        <div class="topbar">
+          <h3 style="margin:0">Flashcards</h3>
+          <input id="filter" class="input" placeholder="Filter by keyword" />
+        </div>
+        <div id="cards" class="cards"></div>
+      </div>
+    </div>
+
+    <script>
+      const $ = (s)=>document.querySelector(s);
+      let allCards = [];
+      function render(list){
+        $('#cards').innerHTML = list.map(c=>`
+          <div class="card">
+            <div class="q">Q: ${c.q || ''}</div>
+            <div class="a">A: ${c.a || ''}</div>
+          </div>
+        `).join('');
+      }
+      async function load(){
+        const params = new URLSearchParams(location.search);
+        const file = params.get('file');
+        let url = '/api/flashcards-json';
+        if (file) url += '?file=' + encodeURIComponent(file);
+        const r = await fetch(url, { cache:'no-store' });
+        const j = await r.json();
+        if (r.ok && j.ok) { allCards = j.cards || []; render(allCards); }
+        else { $('#cards').innerHTML = '<div class="file"><div class="name">No flashcards available</div></div>'; }
+      }
+      load();
+      $('#filter').addEventListener('input', (e)=>{
+        const q = (e.target.value || '').toLowerCase();
+        const filtered = !q ? allCards : allCards.filter(c => (c.q||'').toLowerCase().includes(q) || (c.a||'').toLowerCase().includes(q));
+        render(filtered);
+      });
+    </script>
+  </body>
+  </html>
+
+
+

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Lecture Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="brand">
+          <button id="btnDash" class="dash-icon" title="Open dashboard">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+          <div class="logo"></div>
+          <div class="title">Studywithme.ai</div>
+        </div>
+        <div class="nav-links">
+          <a href="#" class="nav-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.5"/><path d="M16 13H8" stroke="currentColor" stroke-width="1.5"/><path d="M16 17H8" stroke="currentColor" stroke-width="1.5"/><path d="M10 9H8" stroke="currentColor" stroke-width="1.5"/></svg>
+            Docs
+          </a>
+          <a href="#" class="nav-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Zm0 2c-3.866 0-7 2.239-7 5v1h14v-1c0-2.761-3.134-5-7-5Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            About
+          </a>
+          <a href="#" id="navGitHub" class="nav-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3l9.5 5.5v6L12 20 2.5 14.5v-6L12 3Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            GitHub
+          </a>
+          <a href="/login.html" id="navLogin" class="nav-btn">Login</a>
+          <button id="navLogout" class="nav-btn" style="display:none">Logout</button>
+        </div>
+        <div class="glow-bar" aria-hidden="true"></div>
+      </header>
+
+      <!-- Slide-out Dashboard Drawer -->
+      <aside id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer-header">
+          <div class="drawer-title">Dashboard</div>
+          <button id="btnCloseDash" class="nav-btn" aria-label="Close dashboard">Close</button>
+        </div>
+        <div class="drawer-tabs">
+          <button class="tab-btn active" data-tab="overview">Overview</button>
+          <button class="tab-btn" data-tab="user">User Data</button>
+          <button class="tab-btn" data-tab="settings">Settings</button>
+        </div>
+        <div class="drawer-content">
+          <section class="tab-panel" data-tab="overview" style="display:block">
+            <h4>Overview</h4>
+            <p class="muted">Quick snapshot of recent uploads and generated outputs.</p>
+            <div id="dashOverview"></div>
+            <h5 style="margin: 16px 0 8px; color: var(--accent-2);">Recent History</h5>
+            <div class="files" id="dashHistory">
+              <div class="file"><div class="name">No recent activity</div></div>
+            </div>
+          </section>
+          <section class="tab-panel" data-tab="user" style="display:none">
+            <h4>User Data</h4>
+            <p class="muted">User profile and preferences (local-only demo).</p>
+            <div class="files" id="dashUser">
+              <div class="file"><div class="name">Name: <span id="udName">Guest</span></div></div>
+              <div class="file"><div class="name">Email: <span id="udEmail">guest@example.com</span></div></div>
+              <div class="file"><div class="name">Theme: <span id="udTheme">Aurora</span></div></div>
+              <div class="file"><div class="name">Auth: <span id="udAuth">Signed out</span></div></div>
+            </div>
+          </section>
+          <section class="tab-panel" data-tab="settings" style="display:none">
+            <h4>Settings</h4>
+            <div class="actions">
+              <button id="udToggleTheme" class="btn">Toggle Theme</button>
+              <button id="udClear" class="btn">Clear Local Data</button>
+            </div>
+          </section>
+        </div>
+      </aside>
+      <div id="drawerOverlay" class="drawer-overlay" aria-hidden="true"></div>
+      <div class="hero">
+        <div class="logo"></div>
+        <div>
+          <h1>AI Lecture Agent</h1>
+          <p class="lead">Summaries, flashcards, and formula sheets from your notes — delightful and fast.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="left-column">
+          <div class="panel">
+            <div id="dropzone" class="dropzone">
+              <input id="fileInput" type="file" multiple accept=".pdf,.txt,.docx" />
+              <label for="fileInput" class="dz-cta">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 16V4m0 12-4-4m4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Select files</span>
+              </label>
+              <div style="margin-top:8px" class="muted">or drag & drop .pdf, .txt, .docx here</div>
+            </div>
+            <div id="files" class="files" aria-live="polite"></div>
+            <div class="actions">
+              <button id="btnUpload" class="btn" disabled>Upload</button>
+              <button id="btnRun" class="btn" disabled>Generate</button>
+              <span id="status" class="status" style="display:none">
+                <span class="funloader" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </span>
+                Generating…
+              </span>
+            </div>
+          </div>
+
+          <div class="result">
+            <h3>Agent Planner</h3>
+            <div id="planner" class="files" style="margin-bottom:12px">
+              <div class="file"><div class="name">Learning topics will appear here after you generate a summary.</div></div>
+            </div>
+          </div>
+
+          <div class="result">
+            <h3>Downloads</h3>
+            <div id="downloads" class="downloads"></div>
+            <div id="perfile" class="files" style="margin-top:12px"></div>
+          </div>
+        </div>
+
+        <div class="right-column">
+          <div class="result">
+            <h3 style="display:flex; align-items:center; gap:8px;">
+              <span>Preview</span>
+              <span style="flex:1"></span>
+              <div class="tabs" style="display:inline-flex; gap:6px;">
+                <button class="btn" id="tabSum" style="padding:6px 10px" disabled>Summary</button>
+                <button class="btn" id="tabFc" style="padding:6px 10px; background: linear-gradient(135deg, var(--accent-2), #5eead4);" disabled>Flashcards</button>
+                <button class="btn" id="tabFs" style="padding:6px 10px; background: linear-gradient(135deg, #22c55e, #4ade80);" disabled>Formula</button>
+              </div>
+            </h3>
+            <div id="preview" class="preview">No preview yet.</div>
+          </div>
+        </div>
+      </div>
+      <footer class="bottombar">
+        <div class="bt-content">
+          <span class="bt-left">@ 2025 Studywithme.ai</span>
+          <div class="bt-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const $ = (sel) => document.querySelector(sel);
+      const fileInput = $('#fileInput');
+      const dz = $('#dropzone');
+      const filesBox = $('#files');
+      const btnUpload = $('#btnUpload');
+      const btnRun = $('#btnRun');
+      const status = $('#status');
+
+      const formatSize = (n) => {
+        if (n < 1024) return `${n} B`;
+        if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`;
+        return `${(n/1024/1024).toFixed(1)} MB`;
+      };
+
+      function renderFiles(list) {
+        filesBox.innerHTML = '';
+        Array.from(list).forEach(f => {
+          const el = document.createElement('div');
+          el.className = 'file';
+          el.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.4"/><path d="M13 3v5h5" stroke="currentColor" stroke-width="1.4"/></svg>
+            <div class="name">${f.name}</div>
+            <div class="size">${formatSize(f.size || 0)}</div>
+          `;
+          filesBox.appendChild(el);
+        });
+      }
+
+      function setButtons() {
+        btnUpload.disabled = !(fileInput.files && fileInput.files.length);
+        btnRun.disabled = btnUpload.disabled;
+      }
+
+      // Drag & drop
+      ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); dz.classList.add('drag'); }));
+      ;['dragleave','drop'].forEach(ev => dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag'); }));
+      dz.addEventListener('drop', (e)=>{
+        const dt = e.dataTransfer;
+        if (!dt || !dt.files || !dt.files.length) return;
+        fileInput.files = dt.files;
+        renderFiles(fileInput.files);
+        setButtons();
+      });
+
+      fileInput.addEventListener('change', ()=>{ renderFiles(fileInput.files); setButtons(); });
+
+      // Clear server-side inputs/outputs at startup to avoid stale previews
+      (async function startupReset(){
+        try { await fetch('/api/reset', { method: 'POST', cache: 'no-store' }); } catch {}
+        // also reset client-side UI state
+        if (typeof resetPreview === 'function') resetPreview();
+        // load public config for GitHub link
+        try {
+          const r = await fetch('/api/config', { cache:'no-store' });
+          const j = await r.json();
+          if (r.ok && j.github) {
+            const a = document.getElementById('navGitHub');
+            a.href = j.github;
+            a.target = '_blank';
+            a.rel = 'noopener';
+          }
+        } catch {}
+      })();
+
+      function resetPreview(){
+        $('#preview').textContent = 'No preview yet.';
+        $('#downloads').innerHTML = '';
+        $('#perfile').innerHTML = '';
+        $('#tabSum').disabled = true;
+        $('#tabFc').disabled = true;
+        $('#tabFs').disabled = true;
+      }
+
+      async function uploadFiles(){
+        const files = fileInput.files;
+        if(!files.length) return;
+        const fd = new FormData();
+        for(const f of files){ fd.append('files', f); }
+        const r = await fetch(`/api/upload`, { method: 'POST', body: fd });
+        if(!r.ok){ alert('Upload failed'); return; }
+        btnRun.disabled = false;
+        // Clear any previous preview/downloads on fresh upload
+        resetPreview();
+      }
+
+      async function runJob(){
+        status.style.display = '';
+        btnRun.disabled = true;
+        const r = await fetch(`/api/run`, { method: 'POST' });
+        const j = await r.json();
+        status.style.display = 'none';
+        const dls = [];
+        if(j.outputs){
+          if(j.outputs.summary) dls.push({ href: j.outputs.summary, label: 'Summaries', color: '#7c5cff' });
+          if(j.outputs.flashcards) dls.push({ href: j.outputs.flashcards, label: 'Flashcards', color: '#22d3ee' });
+          if(j.outputs.formulas) dls.push({ href: j.outputs.formulas, label: 'Formula sheet', color: '#22c55e' });
+        }
+        $('#downloads').innerHTML = dls.map(x => `
+          <a class="dl" href="${x.href}" download>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:${x.color}"><path d="M12 3v10m0 0-4-4m4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <span>${x.label}</span>
+          </a>
+        `).join('');
+
+        // Per-file outputs list
+        const files = Array.isArray(j.files) ? j.files : [];
+        const per = files.filter(n => n.endsWith('_summary.docx') || n.endsWith('_flashcards.docx') || n.endsWith('_formula.docx'));
+        const groups = {};
+        for (const f of per) {
+          const base = f.replace(/_(summary|flashcards|formula)\.docx$/,'');
+          groups[base] = groups[base] || { base, items: {} };
+          if (f.endsWith('_summary.docx')) groups[base].items.summary = f;
+          if (f.endsWith('_flashcards.docx')) groups[base].items.flashcards = f;
+          if (f.endsWith('_formula.docx')) groups[base].items.formula = f;
+        }
+        const order = Object.values(groups);
+        $('#perfile').innerHTML = order.map(g => {
+          const links = [];
+          if (g.items.summary) links.push(`<a class=\"dl\" href=\"/api/download/${g.items.summary}\" download>Summary</a>`);
+          if (g.items.flashcards) links.push(`<a class=\"dl\" href=\"/api/download/${g.items.flashcards}\" download>Flashcards</a>`);
+          if (g.items.formula) links.push(`<a class=\"dl\" href=\"/api/download/${g.items.formula}\" download>Formula</a>`);
+          return `<div class=\"file\"><div class=\"name\">${g.base}</div><div style=\"display:flex; gap:8px\">${links.join('')}<button class=\"btn\" style=\"margin-left:8px\" onclick=\"previewFile('${g.items.summary || ''}')\">Preview</button></div></div>`;
+        }).join('');
+
+        // Enable tabs once outputs are generated
+        if (j.ok) {
+          $('#tabSum').disabled = false;
+          $('#tabFc').disabled = false;
+          $('#tabFs').disabled = false;
+          await loadPreview('summary');
+          try { await updatePlannerFromSummary(); } catch {}
+        } else {
+          $('#preview').textContent = 'Generation failed.';
+        }
+      }
+
+      async function loadPreview(which){
+        let url = '/api/summary-preview';
+        if(which === 'flashcards') url = '/api/flashcards-preview';
+        if(which === 'formulas') url = '/api/formulas-preview';
+        const pr = await fetch(url, { cache: 'no-store' });
+        if(pr.ok){ $('#preview').innerHTML = await pr.text(); } else { $('#preview').textContent = 'No preview available.'; }
+      }
+
+      // Derive learning topics from summary preview and populate Agent Planner
+      function extractTopicsFromHTML(html){
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const lines = Array.from(tmp.querySelectorAll('p')).map(p=> (p.textContent||'').trim()).filter(Boolean);
+        const candidates = [];
+        for (const t of lines){
+          const clean = t.replace(/^[0-9]+[.)]\s*/, '').trim();
+          if (clean.length < 6) continue;
+          if (/^\b(step|task|generate|export|summar(y|ise)|flashcards?)\b/i.test(clean)) continue;
+          if (clean.split(' ').length <= 2) continue;
+          candidates.push(clean);
+        }
+        const unique = [];
+        const seen = new Set();
+        for (const c of candidates){
+          const key = c.toLowerCase();
+          if (seen.has(key)) continue;
+          seen.add(key);
+          unique.push(c);
+          if (unique.length >= 8) break;
+        }
+        return unique;
+      }
+
+      async function updatePlannerFromSummary(){
+        try {
+          const r = await fetch('/api/summary-preview', { cache:'no-store' });
+          if (!r.ok) return;
+          const html = await r.text();
+          const topics = extractTopicsFromHTML(html);
+          if (!topics.length) return;
+          const planner = document.getElementById('planner');
+          planner.innerHTML = topics.map((t, i)=> `<div class=\"file\"><div class=\"name\">${i+1}. Study: ${t}</div></div>`).join('');
+        } catch {}
+      }
+
+      // Preview a specific per-file docx (summary by default)
+      async function previewFile(file){
+        if(!file){ return; }
+        let endpoint = '/api/summary-preview?file=' + encodeURIComponent(file);
+        if(file.endsWith('_flashcards.docx')) endpoint = '/api/flashcards-preview?file=' + encodeURIComponent(file);
+        if(file.endsWith('_formula.docx')) endpoint = '/api/formulas-preview?file=' + encodeURIComponent(file);
+        const pr = await fetch(endpoint, { cache: 'no-store' });
+        if(pr.ok){ $('#preview').innerHTML = await pr.text(); } else { $('#preview').textContent = 'No preview available.'; }
+      }
+
+      btnUpload.addEventListener('click', uploadFiles);
+      btnRun.addEventListener('click', runJob);
+      $('#tabSum').addEventListener('click', ()=> loadPreview('summary'));
+      $('#tabFc').addEventListener('click', ()=> {
+        // Open dedicated flashcards page; try specific file if last per-file exists
+        const firstPerLink = document.querySelector('#perfile .file a[href*="_flashcards.docx"]');
+        if (firstPerLink) {
+          const fn = firstPerLink.getAttribute('href').split('/api/download/')[1];
+          window.open('/flashcards.html?file=' + encodeURIComponent(fn), '_blank');
+        } else {
+          window.open('/flashcards.html', '_blank');
+        }
+      });
+      $('#tabFs').addEventListener('click', ()=> loadPreview('formulas'));
+
+      // Planner editing removed
+
+      // Dashboard drawer toggle
+      const drawer = document.getElementById('drawer');
+      const overlay = document.getElementById('drawerOverlay');
+      const btnDash = document.getElementById('btnDash');
+      const btnCloseDash = document.getElementById('btnCloseDash');
+      function openDrawer(){
+        if(!drawer||!overlay) return;
+        drawer.classList.add('open');
+        overlay.classList.add('show');
+        drawer.style.transform = 'translateX(0)';
+        overlay.style.opacity = '1';
+        overlay.style.pointerEvents = 'auto';
+        drawer.setAttribute('aria-hidden','false');
+        overlay.setAttribute('aria-hidden','false');
+        document.body.style.overflow='hidden';
+      }
+      function closeDrawer(){
+      	if(!drawer||!overlay) return;
+        drawer.classList.remove('open');
+        overlay.classList.remove('show');
+        drawer.style.transform = '';
+        overlay.style.opacity = '';
+        overlay.style.pointerEvents = '';
+        drawer.setAttribute('aria-hidden','true');
+        overlay.setAttribute('aria-hidden','true');
+        document.body.style.overflow='';
+      }
+      btnDash.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); openDrawer(); });
+      btnCloseDash.addEventListener('click', closeDrawer);
+      overlay.addEventListener('click', closeDrawer);
+      // escape key closes drawer
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+
+      // Dashboard tabs
+      const tabButtons = Array.from(document.querySelectorAll('.drawer-tabs .tab-btn'));
+      const tabPanels = Array.from(document.querySelectorAll('.drawer-content .tab-panel'));
+      tabButtons.forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const tab = b.getAttribute('data-tab');
+          tabButtons.forEach(x=> x.classList.toggle('active', x===b));
+          tabPanels.forEach(p=> p.style.display = (p.getAttribute('data-tab')===tab)?'block':'none');
+        });
+      });
+
+      // Demo: persist simple user data locally
+      let __isAuthed = false;
+      async function loadUser(){
+        const name = localStorage.getItem('udName') || 'Guest';
+        const email = localStorage.getItem('udEmail') || 'guest@example.com';
+        const theme = localStorage.getItem('udTheme') || 'Aurora';
+        let authUser = null;
+        try {
+          const r = await fetch('/api/me', { cache:'no-store', credentials:'include' });
+          const j = await r.json();
+          if (r.ok && j.ok && j.user) authUser = j.user;
+        } catch {}
+        document.getElementById('udName').textContent = authUser?.name || name;
+        document.getElementById('udEmail').textContent = authUser?.email || email;
+        document.getElementById('udTheme').textContent = theme;
+        __isAuthed = !!authUser;
+        document.getElementById('udAuth').textContent = authUser ? 'Signed in' : 'Signed out';
+        document.getElementById('navLogin').style.display = authUser ? 'none' : '';
+        document.getElementById('navLogout').style.display = authUser ? '' : 'none';
+        updateHistoryDisplay();
+      }
+      loadUser();
+      document.getElementById('udToggleTheme').addEventListener('click', ()=>{
+        const cur = localStorage.getItem('udTheme') || 'Aurora';
+        const next = cur === 'Aurora' ? 'Nebula' : 'Aurora';
+        localStorage.setItem('udTheme', next);
+        loadUser();
+      });
+      document.getElementById('udClear').addEventListener('click', async ()=>{
+        localStorage.removeItem('udName');
+        localStorage.removeItem('udEmail');
+        localStorage.removeItem('udTheme');
+        try { await fetch('/api/history', { method: 'DELETE' }); } catch {}
+        loadUser();
+      });
+
+      // Logout
+      document.getElementById('navLogout').addEventListener('click', async ()=>{
+        try { await fetch('/api/auth/logout', { method:'POST', credentials:'include' }); } catch {}
+        loadUser();
+      });
+
+      // History: server-only for authenticated users
+
+      function updateHistoryDisplay() {
+        const container = document.getElementById('dashHistory');
+        if (!__isAuthed) {
+          container.innerHTML = '<div class="file"><div class="name">Sign in to see your recent activity</div></div>';
+          return;
+        }
+        loadServerHistory();
+      }
+
+      async function loadServerHistory(){
+        try {
+          const r = await fetch('/api/history?limit=10', { cache:'no-store', credentials:'include' });
+          const j = await r.json();
+          if (r.ok && j.ok) {
+            const container = document.getElementById('dashHistory');
+            if (!j.items.length) {
+              container.innerHTML = '<div class="file"><div class="name">No recent activity</div></div>';
+              return;
+            }
+            container.innerHTML = j.items.map(h => {
+              const files = Array.isArray(h.files) ? h.files : [];
+              const links = files.length ? `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px">${files.map(fn => `<a class=\"dl\" href=\"/api/download/${fn}\" download>${fn}</a>`).join('')}</div>` : '';
+              return `
+                <div class="file" style="flex-direction:column; align-items:flex-start">
+                  <div style="display:flex; width:100%; align-items:center; justify-content:space-between; gap:8px">
+                    <div class="name">${h.action}</div>
+                    <div class="size">${new Date(h.timestamp).toLocaleString()}</div>
+                  </div>
+                  ${links}
+                </div>
+              `;
+            }).join('');
+          }
+        } catch {}
+      }
+
+      // Track uploads and runs
+      const originalUpload = uploadFiles;
+      uploadFiles = async function() {
+        await originalUpload();
+        if (__isAuthed) { loadServerHistory(); }
+      };
+
+      const originalRun = runJob;
+      runJob = async function() {
+        await originalRun();
+        if (__isAuthed) { loadServerHistory(); }
+      };
+
+      // Load history on page load
+      updateHistoryDisplay();
+    </script>
+  </body>
+  </html>
+
+

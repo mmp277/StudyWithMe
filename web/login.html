@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login - AI Lecture Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .auth-card { max-width: 440px; margin: 60px auto; }
+      .auth-title { text-align:center; color: var(--accent-2); margin-bottom: 16px; font-weight: 800; }
+      .auth-desc { text-align:center; color: var(--muted); margin-bottom: 22px; }
+      .field { display:grid; gap:8px; margin-bottom:14px; }
+      .field label { font-weight:700; color:#dfe7ff; }
+      .input { padding: 12px 14px; border-radius: 12px; border:1.5px solid #273461; background:#121a3acc; color:#fff; }
+      .link { color: var(--accent-2); text-decoration:none; font-weight:700; }
+      .note { color: var(--muted); font-size:13px; text-align:center; margin-top:10px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="brand">
+          <a href="/" class="nav-btn">Home</a>
+        </div>
+        <div class="glow-bar" aria-hidden="true"></div>
+      </header>
+      <div class="panel auth-card">
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-desc">Login to access your dashboard and history</p>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" class="input" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" class="input" type="password" placeholder="••••••••" />
+        </div>
+        <div class="actions" style="justify-content:space-between;">
+          <button id="btnLogin" class="btn">Login</button>
+          <a class="link" href="/register.html">Create account</a>
+        </div>
+        <div class="note">Don't have an account? Register first.</div>
+      </div>
+    </div>
+    <script>
+      const $ = (s) => document.querySelector(s);
+      async function login(){
+        const email = $('#email').value.trim();
+        const password = $('#password').value;
+        if(!email || !password){ alert('Enter email and password'); return; }
+        const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ email, password }) });
+        const j = await r.json().catch(()=>({}));
+        if(!r.ok || !j.ok){ alert(j.error || 'Login failed'); return; }
+        // Hard reload to ensure cookies and fresh JS are loaded
+        window.location.replace('/');
+      }
+      document.getElementById('btnLogin').addEventListener('click', login);
+    </script>
+  </body>
+</html>
+
+
