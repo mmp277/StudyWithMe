@@ -44,7 +44,6 @@ Outputs: `outputs\summaries.docx`, `outputs\flashcards.docx`, `outputs\formula_s
 
 ## Web app (Node.js frontend + backend)
 
-### Demo Video
 <video src="https://github.com/mmp277/StudyWithMe/releases/download/Demo/Demo.mp4" controls width="720"></video>
 
 ### Setup
